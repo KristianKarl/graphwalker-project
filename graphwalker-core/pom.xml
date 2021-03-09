@@ -37,6 +37,6 @@
       <groupId>org.graalvm.truffle</groupId>
       <artifactId>truffle-api</artifactId>
     </dependency>
-    </dependencies>
+  </dependencies>
 
 </project>
