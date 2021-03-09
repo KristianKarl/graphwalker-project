@@ -41,8 +41,8 @@ import static org.graphwalker.core.model.Vertex.RuntimeVertex;
  */
 public class Eulerian implements Algorithm {
 
-  private final Context context;
-  private final Map<RuntimeVertex, PolarityCounter> polarities;
+  protected Context context;
+  protected  Map<RuntimeVertex, PolarityCounter> polarities;
 
   public Eulerian(Context context) {
     this.context = context;
@@ -54,7 +54,7 @@ public class Eulerian implements Algorithm {
     EULERIAN, SEMI_EULERIAN, NOT_EULERIAN
   }
 
-  private void polarize() {
+  protected void polarize() {
     for (RuntimeEdge edge : context.getModel().getEdges()) {
       getPolarityCounter(edge.getSourceVertex()).decrease();
       getPolarityCounter(edge.getTargetVertex()).increase();
