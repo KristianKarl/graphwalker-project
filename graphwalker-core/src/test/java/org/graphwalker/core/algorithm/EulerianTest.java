@@ -26,14 +26,20 @@ package org.graphwalker.core.algorithm;
  * #L%
  */
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
+import org.graphwalker.core.generator.SingletonRandomGenerator;
 import org.graphwalker.core.machine.TestExecutionContext;
 import org.graphwalker.core.model.Edge;
 import org.graphwalker.core.model.Model;
 import org.graphwalker.core.model.Vertex;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Nils Olsson
@@ -43,25 +49,29 @@ public class EulerianTest {
   private final Vertex A = new Vertex().setName("A");
   private final Vertex B = new Vertex().setName("B");
   private final Vertex C = new Vertex().setName("C");
+  private final Vertex D = new Vertex().setName("D");
 
-  private Model createModel() {
+  private Model createKoenigsbegsProblem() {
     return new Model()
-        .addEdge(new Edge().setSourceVertex(A).setTargetVertex(B))
-        .addEdge(new Edge().setSourceVertex(B).setTargetVertex(C))
-        .addEdge(new Edge().setSourceVertex(C).setTargetVertex(A))
-        .addEdge(new Edge().setSourceVertex(B).setTargetVertex(A));
+      .addEdge(new Edge().setSourceVertex(A).setTargetVertex(B).setName("a"))
+      .addEdge(new Edge().setSourceVertex(B).setTargetVertex(C).setName("b"))
+      .addEdge(new Edge().setSourceVertex(C).setTargetVertex(B).setName("c"))
+      .addEdge(new Edge().setSourceVertex(A).setTargetVertex(D).setName("d"))
+      .addEdge(new Edge().setSourceVertex(D).setTargetVertex(C).setName("e"))
+      .addEdge(new Edge().setSourceVertex(C).setTargetVertex(D).setName("f"))
+      .addEdge(new Edge().setSourceVertex(C).setTargetVertex(A).setName("g"));
   }
 
   @Test
-  public void verifyNotEulerian() throws Exception {
-    Model model = createModel().addEdge(new Edge().setSourceVertex(C).setTargetVertex(A));
+  public void verifyNotEulerian() {
+    Model model = createKoenigsbegsProblem();
     Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(model.build()));
     assertThat(eulerian.getEulerianType(), is(Eulerian.EulerianType.NOT_EULERIAN));
   }
 
   @Test(expected = AlgorithmException.class)
   public void verifyNotEulerianPathFromVertex() throws Exception {
-    Model model = createModel().addEdge(new Edge().setSourceVertex(C).setTargetVertex(A));
+    Model model = createKoenigsbegsProblem();
     Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(model.build()));
     assertThat(eulerian.getEulerianType(), is(Eulerian.EulerianType.NOT_EULERIAN));
     eulerian.getEulerPath(A.build());
@@ -69,22 +79,36 @@ public class EulerianTest {
 
   @Test(expected = AlgorithmException.class)
   public void verifyNotEulerianPathFromEdge() throws Exception {
-    Model model = createModel().addEdge(new Edge().setSourceVertex(C).setTargetVertex(A));
+    Model model = createKoenigsbegsProblem().addEdge(new Edge().setSourceVertex(C).setTargetVertex(A));
     Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(model.build()));
     assertThat(eulerian.getEulerianType(), is(Eulerian.EulerianType.NOT_EULERIAN));
     eulerian.getEulerPath(model.getEdges().get(0).build());
   }
 
   @Test
-  public void verifySemiEulerian() throws Exception {
-    Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(createModel().build()));
+  public void verifySemiEulerian() {
+    Model model = createKoenigsbegsProblem()
+      .addEdge(new Edge().setSourceVertex(B).setTargetVertex(C).setName("b"));
+
+    Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(model.build()));
     assertThat(eulerian.getEulerianType(), is(Eulerian.EulerianType.SEMI_EULERIAN));
   }
 
   @Test
-  public void verifyEulerian() throws Exception {
-    Model model = createModel().addEdge(new Edge().setSourceVertex(A).setTargetVertex(B));
+  public void koenigsbergsProblemManuallyEulerizedTest()  {
+    SingletonRandomGenerator.setSeed(1349327921);
+
+    Model model = createKoenigsbegsProblem()
+      .addEdge(new Edge().setSourceVertex(B).setTargetVertex(C).setName("b"))
+      .addEdge(new Edge().setSourceVertex(D).setTargetVertex(C).setName("e"))
+      .addEdge(new Edge().setSourceVertex(C).setTargetVertex(A).setName("g"));
+
     Eulerian eulerian = new Eulerian(new TestExecutionContext().setModel(model.build()));
     assertThat(eulerian.getEulerianType(), is(Eulerian.EulerianType.EULERIAN));
+
+    List<String> path = new ArrayList<String>();
+    eulerian.getEulerPath(A.build()).stream().forEach(e -> path.add(e.getName()));
+    Assert.assertEquals(path, new ArrayList<>(Arrays.asList("a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")));
   }
+
 }
