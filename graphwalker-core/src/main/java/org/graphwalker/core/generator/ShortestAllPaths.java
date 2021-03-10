@@ -27,6 +27,7 @@ package org.graphwalker.core.generator;
  */
 
 import org.graphwalker.core.algorithm.Eulerian;
+import org.graphwalker.core.algorithm.NewYorkStreetSweeper;
 import org.graphwalker.core.condition.StopCondition;
 import org.graphwalker.core.machine.Context;
 import org.graphwalker.core.model.Element;
@@ -57,6 +58,7 @@ public class ShortestAllPaths extends PathGeneratorBase<StopCondition> {
 
   private Path<Element> getPath(Context context) {
     return context.getAlgorithm(Eulerian.class).getEulerPath(context.getCurrentElement());
+    //return context.getAlgorithm(NewYorkStreetSweeper.class).getEulerPath(context.getCurrentElement());
   }
 
   @Override

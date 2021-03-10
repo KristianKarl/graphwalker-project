@@ -20,6 +20,7 @@ public class NewYorkStreetSweeperTest {
   private final Vertex B = new Vertex().setName("B");
   private final Vertex C = new Vertex().setName("C");
   private final Vertex D = new Vertex().setName("D");
+  private final Vertex END = new Vertex().setName("END");
 
   private Model createKoenigsbegsProblem() {
     return new Model()
@@ -38,23 +39,35 @@ public class NewYorkStreetSweeperTest {
 
     Model model = createKoenigsbegsProblem();
     NewYorkStreetSweeper newYorkStreetSweeper = new NewYorkStreetSweeper(new TestExecutionContext().setModel(model.build()));
-    assertThat(newYorkStreetSweeper.getEulerianType(), is(Eulerian.EulerianType.EULERIAN));
 
     List<String> path = new ArrayList<String>();
     newYorkStreetSweeper.getEulerPath(A.build()).stream().forEach(e -> path.add(e.getName()));
-    Assert.assertEquals(path, new ArrayList<>(Arrays.asList("a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")));
+    Assert.assertEquals(new ArrayList<>(Arrays.asList("a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")), path);
   }
 
   @Test
-  public void koenigsbergsProblemSemiEulerianTest()  {
+  public void koenigsbergsProblemSemiEulerianTestWithStartVertexTest()  {
     SingletonRandomGenerator.setSeed(1349327921);
 
-    Model model = createKoenigsbegsProblem().addEdge(new Edge().setSourceVertex(START).setTargetVertex(A).setName("a"));
+    Model model = createKoenigsbegsProblem().addEdge(new Edge().setSourceVertex(START).setTargetVertex(A).setName("start"));
     NewYorkStreetSweeper newYorkStreetSweeper = new NewYorkStreetSweeper(new TestExecutionContext().setModel(model.build()));
-    assertThat(newYorkStreetSweeper.getEulerianType(), is(Eulerian.EulerianType.SEMI_EULERIAN));
 
     List<String> path = new ArrayList<String>();
     newYorkStreetSweeper.getEulerPath(START.build()).stream().forEach(e -> path.add(e.getName()));
-    Assert.assertEquals(path, new ArrayList<>(Arrays.asList("a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")));
+    Assert.assertEquals(new ArrayList<>(Arrays.asList("start", "A", "a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")), path);
+  }
+
+  @Test
+  public void koenigsbergsProblemSemiEulerianTestWithStartAndEndVertexTest()  {
+    SingletonRandomGenerator.setSeed(1349327921);
+
+    Model model = createKoenigsbegsProblem()
+      .addEdge(new Edge().setSourceVertex(START).setTargetVertex(A).setName("start"))
+      .addEdge(new Edge().setSourceVertex(D).setTargetVertex(END).setName("end"));
+    NewYorkStreetSweeper newYorkStreetSweeper = new NewYorkStreetSweeper(new TestExecutionContext().setModel(model.build()));
+
+    List<String> path = new ArrayList<String>();
+    newYorkStreetSweeper.getEulerPath(START.build()).stream().forEach(e -> path.add(e.getName()));
+    Assert.assertEquals(new ArrayList<>(Arrays.asList("start", "A", "a", "B", "b", "C", "f", "D", "e", "C", "g", "A", "d", "D", "e", "C", "c", "B", "b", "C", "g", "A")), path);
   }
 }
